@@ -10,46 +10,65 @@ const modalMessage = document.getElementById('modalMessage');
 const closeModal = document.getElementById('closeModal');
 const modalButton = document.getElementById('modalButton');
 
-const BLOCK_SIZE = 16;
-canvas.width = 400;
-canvas.height = 400;
+let gameWidth, gameHeight;
+let BLOCK_SIZE;
 
+function resizeGame() {
+  // Получаем размеры окна с учетом отступов
+  gameWidth = window.innerWidth * 0.9; // 90% ширины окна
+  gameHeight = window.innerHeight * 0.8; // 80% высоты окна
+
+  // Устанавливаем размеры канваса
+  canvas.width = gameWidth;
+  canvas.height = gameHeight;
+
+  // Выбираем размер блока так, чтобы было целое число блоков по ширине и высоте
+  const maxBlocksX = Math.floor(gameWidth / 20);
+  const maxBlocksY = Math.floor(gameHeight / 20);
+  BLOCK_SIZE = Math.min(
+    Math.floor(gameWidth / maxBlocksX),
+    Math.floor(gameHeight / maxBlocksY)
+  );
+}
+
+// Вызовем при загрузке и при изменении размера окна
+window.addEventListener('resize', resizeGame);
+resizeGame();
+
+// Объявляем переменные уровня и слов
 let count = 0;
-
-// Объект змейки
 let snake = {
-  x: 160,
-  y: 160,
-  dx: BLOCK_SIZE,
+  x: 0,
+  y: 0,
+  dx: 0,
   dy: 0,
-  cells: [], // массив клеток змейки
-  maxCells: 4 // длина змейки
+  cells: [],
+  maxCells: 4
 };
 
-// Начальные слова
 const initialWords = ["Компьютер", "Программирование", "Робототехника", "Гаджет", "Интернет", "Сенсор", "Робот", "Технология"];
 let words = [];
 let currentWord = "";
-let letters = []; // массив букв текущего слова
-let currentLetter = ""; // текущая буква для сбора
-let letterX = 0; // позиция для буквы
+let letters = [];
+let currentLetter = "";
+let letterX = 0;
 let letterY = 0;
 
 let level = 1;
 let wordsPassed = 0;
-let speed = 10; // скорость игры (чем больше, тем медленнее)
+let speed = 10;
 let gameFinished = false;
 
-let waitingForKey = true; // ожидание нажатия клавиши для сбора буквы
-let currentLetterIndex = 0; // индекс текущей буквы в слове
-let collectedWord = ""; // для отображения последнего собранного слова
+let waitingForKey = true;
+let currentLetterIndex = 0;
+let collectedWord = "";
 
-// Обновление статуса игры
+// Обновление статуса
 function updateStatus() {
   document.getElementById('status').innerText = `Уровень: ${level} | Пройдено слов: ${wordsPassed}`;
 }
 
-// Открытие модального окна с сообщением
+// Модальное окно
 function showModal(message, buttonText = null, callback = null) {
   modal.style.display = "flex";
   modalMessage.innerText = message;
@@ -65,18 +84,12 @@ function showModal(message, buttonText = null, callback = null) {
   }
 }
 
-// Закрытие модального окна по клику на крестик
-closeModal.onclick = () => {
-  modal.style.display = "none";
-};
-// Закрытие по клику вне модального окна
+closeModal.onclick = () => { modal.style.display = "none"; };
 window.onclick = (event) => {
-  if (event.target == modal) {
-    modal.style.display = "none";
-  }
+  if (event.target == modal) { modal.style.display = "none"; }
 };
 
-// Генерация нового слова для игры
+// Генерация нового слова
 function newWord() {
   if (words.length === 0) {
     showModal("Поздравляем! Вы прошли все слова!", "Начать заново", () => {
@@ -84,56 +97,43 @@ function newWord() {
     });
     return;
   }
-  // Выбираем случайное слово
-  currentWord = words[Math.floor(Math.random() * words.length)];
-  // Удаляем его из массива, чтобы не повторялось
-  words.splice(words.indexOf(currentWord), 1);
-  // Создаем массив букв слова
+  currentWord = words.splice(Math.floor(Math.random() * words.length), 1)[0];
   letters = [...currentWord];
   currentLetterIndex = 0;
   waitingForKey = true;
   generateLetter();
 }
 
-// Генерация текущей буквы
+// Генерация буквы
 function generateLetter() {
   if (currentLetterIndex >= letters.length) {
-    // Все буквы собраны
-    collectedWord = currentWord; // сохраняем слово для отображения
+    // все буквы собраны
     showModal(`Вы собрали слово: ${currentWord}`, "Следующий уровень", () => {
       level++;
-      if (speed < 30) speed += 2; // увеличиваем скорость
+      if (speed < 30) speed += 2;
       updateStatus();
       newWord();
     });
   } else {
-    // Генерируем текущую букву и позицию
     currentLetter = letters[currentLetterIndex];
     letterX = Math.floor(Math.random() * (canvas.width / BLOCK_SIZE)) * BLOCK_SIZE;
     letterY = Math.floor(Math.random() * (canvas.height / BLOCK_SIZE)) * BLOCK_SIZE;
   }
 }
 
-// Обработка нажатий клавиш
+// Обработка клавиш
 document.addEventListener('keydown', function(e) {
   if (!gameFinished) {
-    // Управление стрелками
-    if (e.keyCode === 37 && snake.dx === 0) { // влево
-      snake.dx = -BLOCK_SIZE;
-      snake.dy = 0;
-    } else if (e.keyCode === 38 && snake.dy === 0) { // вверх
-      snake.dy = -BLOCK_SIZE;
-      snake.dx = 0;
-    } else if (e.keyCode === 39 && snake.dx === 0) { // вправо
-      snake.dx = BLOCK_SIZE;
-      snake.dy = 0;
-    } else if (e.keyCode === 40 && snake.dy === 0) { // вниз
-      snake.dy = BLOCK_SIZE;
-      snake.dx = 0;
+    if (e.keyCode === 37 && snake.dx === 0) {
+      snake.dx = -BLOCK_SIZE; snake.dy = 0;
+    } else if (e.keyCode === 38 && snake.dy === 0) {
+      snake.dy = -BLOCK_SIZE; snake.dx = 0;
+    } else if (e.keyCode === 39 && snake.dx === 0) {
+      snake.dx = BLOCK_SIZE; snake.dy = 0;
+    } else if (e.keyCode === 40 && snake.dy === 0) {
+      snake.dy = BLOCK_SIZE; snake.dx = 0;
     }
   }
-
-  // Обработка клавиш для сбора буквы
   if (waitingForKey && e.key.length === 1) {
     if (e.key.toLowerCase() === currentLetter.toLowerCase()) {
       currentLetterIndex++;
@@ -142,44 +142,29 @@ document.addEventListener('keydown', function(e) {
   }
 });
 
-// Обработчики кнопок управления для мобильных устройств
+// Обработчики кнопок управления (для мобильных)
 document.getElementById('upButton').addEventListener('click', () => {
-  if (snake.dy === 0) {
-    snake.dx = 0;
-    snake.dy = -BLOCK_SIZE;
-  }
+  if (snake.dy === 0) { snake.dx = 0; snake.dy = -BLOCK_SIZE; }
 });
 document.getElementById('downButton').addEventListener('click', () => {
-  if (snake.dy === 0) {
-    snake.dx = 0;
-    snake.dy = BLOCK_SIZE;
-  }
+  if (snake.dy === 0) { snake.dx = 0; snake.dy = BLOCK_SIZE; }
 });
 document.getElementById('leftButton').addEventListener('click', () => {
-  if (snake.dx === 0) {
-    snake.dx = -BLOCK_SIZE;
-    snake.dy = 0;
-  }
+  if (snake.dx === 0) { snake.dx = -BLOCK_SIZE; snake.dy = 0; }
 });
 document.getElementById('rightButton').addEventListener('click', () => {
-  if (snake.dx === 0) {
-    snake.dx = BLOCK_SIZE;
-    snake.dy = 0;
-  }
+  if (snake.dx === 0) { snake.dx = BLOCK_SIZE; snake.dy = 0; }
 });
 
-// Проверка столкновения змейки с текущей буквой
+// Проверка столкновения змейки с буквой
 function checkCollision() {
   if (snake.x === letterX && snake.y === letterY) {
     const index = letters.indexOf(currentLetter);
     if (index !== -1) {
-      // Удаляем собранную букву из массива
       letters.splice(index, 1);
     }
-    // Увеличиваем длину змейки
     snake.maxCells++;
     if (letters.length === 0) {
-      // Все буквы собраны, показываем слово
       showModal(`Вы собрали слово: ${currentWord}`, "Следующий уровень", () => {
         level++;
         if (speed < 30) speed += 2;
@@ -187,69 +172,57 @@ function checkCollision() {
         newWord();
       });
     } else {
-      // Генерируем следующую букву
       generateLetter();
     }
   }
 }
 
-// Запуск новой игры
+// запуск игры
 function startGame() {
-  // Сброс настроек змейки
-  snake.x = 160;
-  snake.y = 160;
+  // сброс змейки
+  snake.x = 0;
+  snake.y = 0;
   snake.dx = BLOCK_SIZE;
   snake.dy = 0;
   snake.cells = [];
   snake.maxCells = 4;
-
-  // Восстановление начальных слов
   words = [...initialWords];
   level = 1;
   wordsPassed = 0;
   speed = 10;
   updateStatus();
-
-  // Скрываем кнопки старт/следующий уровень/повтор
   startButton.style.display = "none";
   nextLevelButton.style.display = "none";
   restartButton.style.display = "none";
-
   gameFinished = false;
-  collectedWord = ""; // сбрасываем последнее слово
+  collectedWord = "";
   newWord();
   loop();
 }
 
-// Обработчики для кнопок управления
-startButton.onclick = () => {
-  startGame();
-};
+// Обработчики кнопок управления
+startButton.onclick = () => { startGame(); };
 nextLevelButton.onclick = () => {
   newWord();
   nextLevelButton.style.display = "none";
 };
-restartButton.onclick = () => {
-  startGame();
-};
+restartButton.onclick = () => { startGame(); };
 
-// Основной цикл игры
+// Основной цикл
 function loop() {
   requestAnimationFrame(loop);
   if (++count < speed) return;
   count = 0;
 
-  // Очистка канваса
   context.clearRect(0, 0, canvas.width, canvas.height);
 
-  // Проверка столкновений
   checkCollision();
 
   // Обновление позиции змейки
   snake.x += snake.dx;
   snake.y += snake.dy;
 
-  // Обеспечиваем обертку по границам
+  // Обеспечиваем обертку
   if (snake.x < 0) snake.x = canvas.width - BLOCK_SIZE;
   if (snake.x >= canvas.width) snake.x = 0;
   if (snake.y < 0) snake.y = canvas.height - BLOCK_SIZE;
@@ -265,9 +238,9 @@ function loop() {
   for (let i = 0; i < snake.cells.length; i++) {
     for (let j = i + 1; j < snake.cells.length; j++) {
       if (snake.cells[i].x === snake.cells[j].x && snake.cells[i].y === snake.cells[j].y) {
-        // Если столкнулись, сбрасываем змейку
-        snake.x = 160;
-        snake.y = 160;
+        // столкновение, сброс змейки
+        snake.x = 0;
+        snake.y = 0;
         snake.cells = [];
         snake.maxCells = 4;
         snake.dx = BLOCK_SIZE;
@@ -292,5 +265,5 @@ function loop() {
 }
 
 // Инициализация
-startButton.style.display = "inline-block"; // показываем кнопку старт
+startButton.style.display = "inline-block";
 updateStatus();
