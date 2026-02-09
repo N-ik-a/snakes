@@ -1,0 +1,58 @@
+body {
+  height: 100%;
+  margin: 0;
+}
+/*Задаём глобальные параметры*/
+body {
+  background: black;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+/*Делаем границу вокруг игрового поля*/
+#game {
+  border: 1px solid #ffffff;
+  display: block;
+  margin: 20px auto;
+}
+
+#nextLevelButton, #restartButton {
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+/* Модальное окно */
+
+#status {
+  text-align: center;
+  font-weight: bold;
+}
+
+/* Модальное окно */
+#modal {
+  display: none;
+  position: fixed;
+  z-index: 999;
+  padding-top: 100px;
+  left: 0; top: 0;
+  width: 100%; height: 100%;
+  overflow: auto;
+  background-color: rgba(0,0,0,0.4);
+}
+
+#modalContent {
+  background-color: #fff;
+  margin: auto;
+  padding: 20px;
+  width: 300px;
+  border-radius: 8px;
+  text-align: center;
+}
+#upButton, #downButton, #leftButton, #rightButton {
+  padding: 10px 15px;
+  font-size: 16px;
+  margin: 5px;
+  cursor: pointer;
+}
