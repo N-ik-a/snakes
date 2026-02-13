@@ -16,7 +16,7 @@ let BLOCK_SIZE;
 function resizeGame() {
   // Получаем размеры окна с учетом отступов
   gameWidth = window.innerWidth * 0.5; // 50% ширины окна
-  gameHeight = window.innerHeight * 0.5; // 50% высоты окна
+  gameHeight = gameWidth // 50% высоты окна
 
   // Устанавливаем размеры канваса
   canvas.width = gameWidth;
@@ -267,4 +267,5 @@ function loop() {
 // Инициализация
 startButton.style.display = "inline-block";
 updateStatus();
+
 
