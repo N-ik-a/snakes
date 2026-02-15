@@ -285,11 +285,11 @@ nextLevelButton.onclick = () => {
 restartButton.onclick = () => { startGame(); };
 
 // Основной цикл
-let count = 0;
+let frameCount = 0;
 function loop() {
   requestAnimationFrame(loop);
-  if (++count < speed) return;
-  count = 0;
+  if (++frameCount < speed) return;
+  frameCount = 0;
 
   context.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -343,5 +343,6 @@ function loop() {
 
 // Инициализация
 updateStatus();
+
 
 
