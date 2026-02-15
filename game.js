@@ -10,29 +10,104 @@ const modalMessage = document.getElementById('modalMessage');
 const closeModal = document.getElementById('closeModal');
 const modalButton = document.getElementById('modalButton');
 
-let gameWidth, gameHeight;
+// Элементы управления для мобильных устройств
+const controlsContainer = document.createElement('div');
+controlsContainer.id = 'controlsContainer';
+document.body.appendChild(controlsContainer);
+controlsContainer.style.display = 'flex';
+controlsContainer.style.flexWrap = 'wrap';
+controlsContainer.style.justifyContent = 'center';
+controlsContainer.style.marginTop = '10px';
+
+// Создаем кнопки управления (в мобильной версии)
+const upButton = document.createElement('button');
+upButton.id = 'upButton';
+upButton.innerText = '⬆';
+const downButton = document.createElement('button');
+downButton.id = 'downButton';
+downButton.innerText = '⬇';
+const leftButton = document.createElement('button');
+leftButton.id = 'leftButton';
+leftButton.innerText = '⬅';
+const rightButton = document.createElement('button');
+rightButton.id = 'rightButton';
+rightButton.innerText = '➡';
+
+controlsContainer.appendChild(upButton);
+controlsContainer.appendChild(downButton);
+controlsContainer.appendChild(leftButton);
+controlsContainer.appendChild(rightButton);
+
+// Для десктопа, управляемые кнопки
+const desktopControls = {
+  up: document.createElement('button'),
+  down: document.createElement('button'),
+  left: document.createElement('button'),
+  right: document.createElement('button')
+};
+desktopControls.up.innerText = 'Вверх';
+desktopControls.down.innerText = 'Вниз';
+desktopControls.left.innerText = 'Влево';
+desktopControls.right.innerText = 'Вправо';
+
+// Вариант отображения управления
+let controlsPosition = 'side'; // или 'bottom'
+
+function setupControlsLayout() {
+  // Определяем ширину окна
+  const windowWidth = window.innerWidth;
+
+  if (windowWidth > 600) {
+    // Для больших экранов — управление сбоку (справа или слева)
+    controlsContainer.innerHTML = '';
+    controlsContainer.style.flexDirection = 'column';
+    controlsContainer.style.alignItems = 'center';
+    controlsContainer.appendChild(desktopControls.up);
+    controlsContainer.appendChild(desktopControls.down);
+    controlsContainer.appendChild(desktopControls.left);
+    controlsContainer.appendChild(desktopControls.right);
+    controlsPosition = 'side';
+  } else {
+    // Для маленьких — управление под полем
+    controlsContainer.innerHTML = '';
+    controlsContainer.style.flexDirection = 'row';
+    controlsContainer.style.justifyContent = 'center';
+    controlsContainer.appendChild(upButton);
+    controlsContainer.appendChild(downButton);
+    controlsContainer.appendChild(leftButton);
+    controlsContainer.appendChild(rightButton);
+    controlsPosition = 'bottom';
+  }
+}
+
+// Вызовем при загрузке и при изменении размера
+window.addEventListener('resize', () => {
+  resizeGame();
+  setupControlsLayout();
+});
+setupControlsLayout();
+
+// Размеры игрового поля
+let gameSize; // квадратное поле, размер вычислим позже
 let BLOCK_SIZE;
 
 function resizeGame() {
-  // Получаем размеры окна с учетом отступов
-  gameWidth = window.innerWidth * 0.5; // 50% ширины окна
-  gameHeight = window.innerHeight * 0.5; // 50% высоты окна
+  const windowWidth = window.innerWidth;
+  const windowHeight = window.innerHeight;
 
-  // Устанавливаем размеры канваса
-  canvas.width = gameWidth;
-  canvas.height = gameHeight;
+  // Определяем наибольший возможный размер квадрата, чтобы вместился на странице
+  gameSize = Math.min(windowWidth, windowHeight * (controlsPosition === 'bottom' ? 0.9 : 1));
 
-  // Выбираем размер блока так, чтобы было целое число блоков по ширине и высоте
-  const maxBlocksX = Math.floor(gameWidth / 20);
-  const maxBlocksY = Math.floor(gameHeight / 20);
-  BLOCK_SIZE = Math.min(
-    Math.floor(gameWidth / maxBlocksX),
-    Math.floor(gameHeight / maxBlocksY)
-  );
+  // Устанавливаем размер канваса
+  canvas.width = gameSize;
+  canvas.height = gameSize;
+
+  // Выбираем размер блока так, чтобы было целое число блоков
+  const maxBlocks = Math.floor(gameSize / 20);
+  BLOCK_SIZE = Math.floor(gameSize / maxBlocks);
 }
 
-// Вызовем при загрузке и при изменении размера окна
-window.addEventListener('resize', resizeGame);
+// Вызовем при загрузке
 resizeGame();
 
 // Объявляем переменные уровня и слов
@@ -143,16 +218,16 @@ document.addEventListener('keydown', function(e) {
 });
 
 // Обработчики кнопок управления (для мобильных)
-document.getElementById('upButton').addEventListener('click', () => {
+upButton.addEventListener('click', () => {
   if (snake.dy === 0) { snake.dx = 0; snake.dy = -BLOCK_SIZE; }
 });
-document.getElementById('downButton').addEventListener('click', () => {
+downButton.addEventListener('click', () => {
   if (snake.dy === 0) { snake.dx = 0; snake.dy = BLOCK_SIZE; }
 });
-document.getElementById('leftButton').addEventListener('click', () => {
+leftButton.addEventListener('click', () => {
   if (snake.dx === 0) { snake.dx = -BLOCK_SIZE; snake.dy = 0; }
 });
-document.getElementById('rightButton').addEventListener('click', () => {
+rightButton.addEventListener('click', () => {
   if (snake.dx === 0) { snake.dx = BLOCK_SIZE; snake.dy = 0; }
 });
 
@@ -161,6 +236,7 @@ function checkCollision() {
   if (snake.x === letterX && snake.y === letterY) {
     const index = letters.indexOf(currentLetter);
     if (index !== -1) {
+      // удаляем собранную букву из массива
       letters.splice(index, 1);
     }
     snake.maxCells++;
@@ -209,6 +285,7 @@ nextLevelButton.onclick = () => {
 restartButton.onclick = () => { startGame(); };
 
 // Основной цикл
+let count = 0;
 function loop() {
   requestAnimationFrame(loop);
   if (++count < speed) return;
@@ -265,7 +342,6 @@ function loop() {
 }
 
 // Инициализация
-startButton.style.display = "inline-block";
 updateStatus();
 
 
