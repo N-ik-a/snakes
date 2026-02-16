@@ -1,82 +1,93 @@
-/* Общие стили */
+/* Общие стили для темной темы */
 body {
   margin: 0;
   font-family: Arial, sans-serif;
+  background-color: #121212; /* темный фон */
+  color: #fff; /* белый текст */
 }
 
-#game-wrapper {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 10px;
-}
-
-/* Канвас */
-#game {
-  background-color: #eee;
-  display: block;
-  margin: 0 auto;
-  border: 2px solid #333;
-}
-
-/* Контейнер для управления — по умолчанию скрыт, показываем его через JS при адаптиве */
+/* Контейнер для управления */
 #controlsContainer {
   margin-top: 10px;
   display: flex;
   gap: 10px;
+  justify-content: center;
 }
 
-/* Для десктопных кнопок управления, скрытых по умолчанию */
-#desktopControls {
-  display: flex;
-  gap: 10px;
-  margin-top: 10px;
+/* Канвас игры */
+#game {
+  background-color: #222;
+  display: block;
+  margin: 20px auto;
+  border: 2px solid #555;
+  width: 600px; /* по умолчанию для ПК */
+  height: 400px;
 }
 
 /* Модальное окно */
 .modal {
-  display: none;
+  display: none; /* по умолчанию скрыто */
   position: fixed;
   z-index: 1000;
   left: 0; top: 0;
   width: 100%; height: 100%;
-  background-color: rgba(0,0,0,0.5);
+  background-color: rgba(0,0,0,0.8);
   align-items: center;
   justify-content: center;
 }
 
 .modal-content {
-  background-color: #fff;
+  background-color: #333;
+  color: #fff;
   padding: 20px;
   border-radius: 8px;
-  position: relative;
   max-width: 400px;
   width: 80%;
+  position: relative;
   text-align: center;
 }
 
-#modalMessage {
-  margin-bottom: 20px;
-}
-
-#modalButton {
-  padding: 8px 16px;
-  cursor: pointer;
-}
-
+/* Кнопка закрытия модального окна */
 .close {
   position: absolute;
   top: 10px; right: 10px;
   background: none;
   border: none;
-  font-size: 20px;
+  font-size: 24px;
+  color: #fff;
   cursor: pointer;
 }
 
-/* Адаптивность для мобильных */
+/* Кнопки управления */
+button {
+  padding: 10px 20px;
+  font-size: 14px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  background-color: #333;
+  color: #fff;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: #555;
+}
+
+/* Мобильные стили */
 @media(max-width: 600px) {
+  #game {
+    width: 100%;
+    height: auto;
+  }
   #controlsContainer {
     flex-direction: column;
     align-items: center;
   }
+  button {
+    padding: 16px 24px;
+    font-size: 18px;
+  }
 }
+
+
